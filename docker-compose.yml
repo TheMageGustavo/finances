@@ -3,20 +3,21 @@ version: '3.4'
 services:
 
   traefik:
-    container_name: traefik4
+    container_name: traefik
     image: traefik:1.7.12-alpine
     ports:
-      - "80:83"
+      - "80:80"
     labels:
-      - traefik4.enabled=true
-      - traefik4.port=8083
-      - traefik4.frontend.rule=Host:traefik.${DOMAIN}
-      - traefik4.backend=traefik
+      - traefik.enabled=true
+      - traefik.port=8080
+      - traefik.frontend.rule=Host:traefik.${DOMAIN}
+      - traefik.backend=traefik
+      - traefik.fronted.auth.basic=${TRAEFIK_AUTH}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
   web:
-    container_name: web4
+    container_name: web
     depends_on:
       - api
     build:
@@ -24,23 +25,21 @@ services:
       dockerfile: Dockerfile
       
     labels:
-      - traefik4.enabled=true
-      - traefik4.port=8001
-      - traefik4.frontend.rule=Host:vuefinances.${DOMAIN}
-      - traefik4.backend=web
+      - traefik.enabled=true
+      - traefik.port=8000
+      - traefik.backend=web
 
   api:
-    container_name: api4
+    container_name: api
     depends_on:
       - prisma
     build:
       context: ./deps/back
       dockerfile: Dockerfile
     labels:
-      - traefik4.enabled=true
-      - traefik4.port=4001
-      - traefik4.frontend.rule=Host:api.vuefinances.${DOMAIN}
-      - traefik4.backend=api
+      - traefik.enabled=true
+      - traefik.port=4000
+      - traefik.backend=api
     environment:
       CLIENT_HOSTS:
       JWT_SECRET:
@@ -51,7 +50,7 @@ services:
       PRISMA_SERVICE_SECRET:
 
   prisma:
-    container_name: prisma4
+    container_name: prisma
     image: prismagraphql/prisma:1.27
     restart: always
     depends_on:
@@ -72,21 +71,21 @@ services:
             migrations: true
             rawAccess: true
     labels:
-      - traefik4.enable=true
-      - traefik4.frontend.rule=Host:prisma.${DOMAIN}
-      - traefik4.backend=prisma
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:prisma.${DOMAIN}
+      - traefik.backend=prisma
 
 
   postgres:
-    container_name: postgres4
+    container_name: postgres
     image: postgres:10.4
     restart: always
     environment:
       POSTGRES_USER:
       POSTGRES_PASSWORD:
     labels:
-      - traefik4.enable=true
-      - traefik4.backend=postgres
+      - traefik.enable=true
+      - traefik.backend=postgres
     volumes:
       - postgres:/var/lib/postgresql/data
 
