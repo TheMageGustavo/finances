@@ -26,7 +26,7 @@ services:
       
     labels:
       - traefik.enabled=true
-      - traefik.port=8000
+      - traefik.frontend.rule=Host:${DOMAIN}
       - traefik.backend=web
 
   api:
@@ -39,6 +39,7 @@ services:
     labels:
       - traefik.enabled=true
       - traefik.port=4000
+      - traefik.frontend.rule=Host:api.${DOMAIN}
       - traefik.backend=api
     environment:
       CLIENT_HOSTS:
